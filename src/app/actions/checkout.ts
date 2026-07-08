@@ -73,7 +73,7 @@ try {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      transactionId: "ID_DA_TRANSACAO*,
+      transactionId: "ID_DA_TRANSACAO",
       customerName: "NOME_CLIENTE",
       amount: VALOR_TOTAL,
       status: "paid",
