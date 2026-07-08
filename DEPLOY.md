@@ -40,6 +40,24 @@ O seed cria:
   exemplo (`/pagar/demo123`) — apague os dois pela tela de admin depois de
   conferir que tudo funciona.
 
+### Se `npx prisma migrate dev`/`deploy` travar ou der erro de conexão (P1001/P1002)
+
+Em algumas máquinas Windows, o motor de migration do Prisma tem dificuldade
+pra manter conexão com o endpoint pooled do Neon (mesmo o `pg`/app
+funcionando normalmente). Se isso acontecer:
+
+1. `npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script`
+   gera o SQL da migration sem precisar de conexão ao vivo.
+2. Rode esse SQL direto contra o banco com `node scripts/apply-init.mjs`
+   (usa o driver `pg` puro, que não tem esse problema).
+3. Rode `node scripts/mark-migration-applied.mjs` pra registrar a migration
+   como aplicada em `_prisma_migrations`, senão o próximo
+   `prisma migrate deploy` (inclusive o do build da Vercel) tenta rodar de
+   novo e dá erro de "tabela já existe".
+
+Isso já foi feito uma vez pra deixar o banco pronto — só documentado aqui
+caso precise repetir em outra máquina/banco.
+
 ## 4. Novo projeto na Vercel
 
 Este projeto (`checkout-app`) tem **repositório git próprio**, separado do
