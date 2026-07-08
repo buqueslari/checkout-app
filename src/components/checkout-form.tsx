@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { submitOrder, type CheckoutState } from "@/app/actions/checkout";
-import { detectBrand, formatCardNumber, formatExpiry, generateTestCard } from "@/lib/card";
+import { detectBrand, formatCardNumber, formatExpiry } from "@/lib/card";
 
 const initialState: CheckoutState = {};
 
@@ -30,14 +30,6 @@ export function CheckoutForm({
   const [cvv, setCvv] = useState("");
 
   const brand = detectBrand(cardNumber.replace(/\D/g, ""));
-
-  function fillTestCard() {
-    const card = generateTestCard();
-    setCardNumber(card.number);
-    setCardName(card.name);
-    setExpiry(card.expiry);
-    setCvv(card.cvv);
-  }
 
   if (state.success) {
     return (
@@ -94,14 +86,6 @@ export function CheckoutForm({
       <form action={formAction} className="glass-panel p-6 flex flex-col gap-4">
         <input type="hidden" name="productId" value={productId ?? ""} />
         <input type="hidden" name="paymentLinkId" value={paymentLinkId ?? ""} />
-
-        <button
-          type="button"
-          onClick={fillTestCard}
-          className="btn btn-secondary justify-center text-sm"
-        >
-          Gerar cartão de teste
-        </button>
 
         <div className="flex flex-col gap-1.5">
           <label className="field-label">Número do cartão</label>
