@@ -1,0 +1,101 @@
+// Schema do checkout-app — checkout por link (produto novo, separado do workspace/Gestore)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderKind {
+  PRODUCT
+  LINK
+}
+
+enum OrderStatus {
+  APPROVED
+  DECLINED
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// Linha única com as configurações visuais/institucionais do checkout,
+// editável 100% pelo admin (logo, fonte, cor, nome da empresa).
+model Settings {
+  id           String   @id @default("singleton")
+  companyName  String   @default("Minha Empresa")
+  logoUrl      String?
+  primaryColor String   @default("#6d28d9")
+  fontFamily   String   @default("Inter")
+  supportEmail String?
+  currency     String   @default("BRL")
+  updatedAt    DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  priceCents  Int
+  imageUrl    String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([active])
+}
+
+model PaymentLink {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  description String
+  amountCents Int
+  expiresAt   DateTime?
+  singleUse   Boolean   @default(true)
+  usedAt      DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  orders Order[]
+
+  @@index([active])
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  kind          OrderKind
+  productId     String?
+  product       Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  paymentLinkId String?
+  paymentLink   PaymentLink? @relation(fields: [paymentLinkId], references: [id], onDelete: SetNull)
+
+  amountCents   Int
+  customerName  String
+  customerEmail String?
+
+  // Só marca + últimos 4 dígitos — número completo e CVV nunca são gravados,
+  // nem em modo de teste (ver checkout-app/DEPLOY.md).
+  cardBrand String?
+  cardLast4 String?
+
+  status          OrderStatus @default(APPROVED)
+  gatewayProvider String      @default("TEST")
+  gatewayReference String?
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([paymentLinkId])
+  @@index([createdAt])
+}
