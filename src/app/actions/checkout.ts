@@ -10,7 +10,10 @@ export type CheckoutState = {
   brand?: string;
 };
 
-
+// Modo de teste: sempre aprova, não valida formato de cartão (Luhn/validade/
+// CVV) e NUNCA grava o número completo ou o CVV em lugar nenhum — só marca +
+// últimos 4 dígitos, pra já servir de registro do pedido no admin. Ver
+// checkout-app/DEPLOY.md pra como isso muda quando um gateway real entrar.
 export async function submitOrder(
   _prevState: CheckoutState,
   formData: FormData
@@ -65,22 +68,4 @@ export async function submitOrder(
   }
 
   return { success: true, last4, brand };
-}
-
-// Exemplo: Dentro do bloco de sucesso do pagamento (onde você já devolve o pagamento como processado)
-try {
-  const webhookResponse = await fetch("https://central-de-dados.vercel.app/api/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      transactionId: "ID_DA_TRANSACAO",
-      customerName: "NOME_CLIENTE",
-      amount: VALOR_TOTAL,
-      status: "paid",
-      gateway: "BlackCatPay" // ou EvolutPay
-    }),
-  });
-  // Ignore o retorno, mas trate erros
-} catch (e) {
-  console.error("Falha no webhook da dashboard:", e);
 }

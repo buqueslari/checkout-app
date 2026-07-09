@@ -1,4 +1,7 @@
-
+// Utilidades de UI para o cartão do checkout — formatação e detecção de
+// bandeira pra desenhar o cartão virtual. Nada aqui valida se um cartão é
+// "de verdade" nem faz qualquer chamada externa — ver checkout-app/DEPLOY.md
+// pra como conectar um gateway real no futuro.
 
 export type CardBrand = "visa" | "mastercard" | "amex" | "elo" | "unknown";
 
